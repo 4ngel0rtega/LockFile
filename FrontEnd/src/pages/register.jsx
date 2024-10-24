@@ -7,11 +7,6 @@ function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [hasMinLength, setHasMinLength] = useState(false);
-    const [hasUpperCase, setHasUpperCase] = useState(false);
-    const [hasLowerCase, setHasLowerCase] = useState(false);
-    const [hasNumber, setHasNumber] = useState(false);
-    const [hasSymbol, setHasSymbol] = useState(false);
     const [repeatPassword, setRepeatPassword] = useState("");
     const [showRepeatPassword, setShowRepeatPassword] = useState(false);
     const [errors, setErrors] = useState({ name: "", email: "", password: "", repeatPassword: "" });
