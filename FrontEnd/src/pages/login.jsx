@@ -33,13 +33,32 @@ function Login() {
         return true;
     };
     
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const isEmailValid = validateEmail(email);
-        const isPasswordValid = validatePassword(password);
-    
-        if (isEmailValid && isPasswordValid) {
-            console.log("Authentication attempt initiated");
+        
+        try {
+            // Realizar la solicitud POST al backend para el login
+            const response = await fetch('http://localhost:3001/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Si la autenticación es exitosa, almacenar el ID del usuario y mostrar mensaje
+                // setUserId(data.userId);
+                alert('Inicio de sesión exitoso');
+            } else {
+                // Mostrar mensaje de error
+                alert(data.message || 'Error al iniciar sesión');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al iniciar sesión');
         }
     };
 

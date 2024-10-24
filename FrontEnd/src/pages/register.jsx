@@ -97,13 +97,34 @@ function Register() {
         return true;
     };
     
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        const isEmailValid = validateEmail(email);
-        const isPasswordValid = validatePassword(password);
-    
-        if (isEmailValid && isPasswordValid) {
-            console.log("Authentication attempt initiated");
+        
+        if (name.length <= 0 || email.length <= 0 || password.length <= 0 || repeatPassword.length <= 0) {
+            alert("No puede dejar campos vacios")
+            return
+        }
+
+        try {
+            // Realizar la solicitud POST al backend
+            const response = await fetch('http://localhost:3001/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, password})
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Usuario registardo con éxito");
+            } else {
+                alert(data.message || 'Error al registrar al usuario')
+            }
+        } catch (error) {
+            console.error('Error', error);
+            alert("Error al registrar el usuario");
         }
     };
 
