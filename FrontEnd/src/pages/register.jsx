@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { FaArrowLeft, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
+import { FaArrowLeft, FaDoorOpen, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
+import { IoCloseOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 
 function Register() {
@@ -10,6 +11,8 @@ function Register() {
     const [repeatPassword, setRepeatPassword] = useState("");
     const [showRepeatPassword, setShowRepeatPassword] = useState(false);
     const [errors, setErrors] = useState({ name: "", email: "", password: "", repeatPassword: "" });
+
+    const [ showModal, setShowModal ] = useState(false)
 
     const validateName = (name) => {
         if (name.length <= 0) {
@@ -73,9 +76,7 @@ function Register() {
     
         setErrors((prev) => ({ ...prev, password: "" }));
         return true;
-    };
-    
-    
+    };  
 
     const validateRepeatPassword = (repeatPassword) => {
         if (repeatPassword.length <= 0) {
@@ -99,34 +100,42 @@ function Register() {
     
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+    
         if (name.length <= 0 || email.length <= 0 || password.length <= 0 || repeatPassword.length <= 0) {
-            alert("No puede dejar campos vacios")
-            return
+            alert("No puede dejar campos vacíos");
+            return;
         }
-
+    
         try {
             // Realizar la solicitud POST al backend
-            const response = await fetch('http://localhost:3001/register', {
+            const response = await fetch('http://localhost:3001/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, email, password})
+                body: JSON.stringify({ name, email, password })
             });
-
+    
             const data = await response.json();
-
+    
             if (response.ok) {
-                alert("Usuario registardo con éxito");
+                setShowModal(true);
+                setName("");
+                setEmail("");
+                setPassword("");
+                setRepeatPassword("");
+            } else if (response.status === 409) {
+                // Mostrar mensaje de error cuando el correo ya está registrado
+                alert(data.message);
             } else {
-                alert(data.message || 'Error al registrar al usuario')
+                alert(data.message || 'Error al registrar al usuario');
             }
         } catch (error) {
-            console.error('Error', error);
+            console.error('Error:', error);
             alert("Error al registrar el usuario");
         }
     };
+    
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
@@ -264,6 +273,26 @@ function Register() {
                     <p>Ya tienes cuenta? <Link to={"/login"} className="font-medium text-blue-400">Inicia Sesión</Link> </p>
                 </div>
             </div>
+
+            {showModal && (
+                <div className="bg-black bg-opacity-50 w-full h-screen absolute flex justify-center items-center z-50">
+                    <div className="md:w-1/4 w-3/4 p-4 flex flex-col gap-5 bg-white rounded-lg z-50">
+                        <div>
+                            <div className="flex justify-between items-center">
+                                <h1 className="text-2xl font-bold text-blue-700">Usuario Encriptado con Éxito</h1>
+                                <IoCloseOutline size={28} onClick={() => setShowModal(!showModal)}/>
+                            </div>
+                            <p className="mt-5 text-lg"><span className="font-bold">¡Felicidades🥳!</span> Tu cuenta ha sido registrada y encriptada con éxito. Ahora puedes iniciar sesión de forma segura.</p>
+                        </div>
+
+                        <div>
+                            <Link to={"/login"} className="bg-blue-600 p-2 flex items-center justify-center gap-2 text-white rounded-lg text-lg">
+                                <FaDoorOpen/>Iniciar sesión
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
