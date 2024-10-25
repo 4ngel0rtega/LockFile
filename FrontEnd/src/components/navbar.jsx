@@ -1,11 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom"
 import { FiUser } from "react-icons/fi";
 import { RiLogoutBoxLine } from "react-icons/ri";
 import { FaBars, FaTimes } from "react-icons/fa";
 
+const parseCookies = (cookieString) => {
+    return cookieString.split(';').reduce((cookies, cookie) => {
+        const [name, value] = cookie.trim().split('=');
+        cookies[name] = decodeURIComponent(value);
+        return cookies;
+    }, {});
+};
+
 function Navbar() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    // Leer las cookies
+    const [cookies, setCookies] = useState({});
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const cookieString = document.cookie;
+            console.log('document.cookie:', cookieString);
+            const parsedCookies = parseCookies(cookieString);
+            setCookies(parsedCookies);
+            console.log('Parsed Cookies:', parsedCookies);
+        }
+    }, []);
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => {
@@ -58,7 +79,7 @@ function Navbar() {
                         </div>
 
                         <div className="flex items-center">
-                            {isLoggedIn ? (
+                            {cookies.sessionToken ? (
                                 <button
                                     // onClick={}
                                     className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
@@ -105,7 +126,7 @@ function Navbar() {
                             </a>
 
                             <div className="mt-4">
-                                {isLoggedIn ? (
+                                {cookies.sessionToken ? (
                                     <button
                                         // onClick={}
                                         className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"

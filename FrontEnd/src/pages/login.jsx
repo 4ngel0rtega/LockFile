@@ -42,6 +42,7 @@ function Login() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include', // Permitir cookies en la solicitud
                 body: JSON.stringify({ email, password })
             });
     

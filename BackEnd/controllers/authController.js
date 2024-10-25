@@ -1,6 +1,17 @@
 import CryptoJS from 'crypto-js';
 import fs from "fs";
 import { v4 as uuidv4 } from 'uuid';
+import forge from "node-forge";
+import cookie from "cookie"
+
+// Generar Claves RSA
+function generateKeyPair() {
+    const { privateKey, publicKey } = forge.pki.rsa.generateKeyPair({ bits: 2048 });
+    return {
+        privateKey: forge.pki.privateKeyToPem(privateKey),
+        publicKey: forge.pki.publicKeyToPem(publicKey),
+    };
+}
 
 // Ruta para registrar un nuevo usuario
 export const registerUser = (req, res) => {
@@ -14,6 +25,9 @@ export const registerUser = (req, res) => {
     
     // Generar un ID único para el usuario
     const userId = uuidv4();
+
+    // Generar par de claves RSA (pública y privada)
+    const { privateKey, publicKey } = generateKeyPair();
 
     // Leer el archivo JSON existente (o crearlo si no existe)
     const usersFilePath = './data/users.json';
@@ -34,7 +48,19 @@ export const registerUser = (req, res) => {
     }
 
     // Crear un nuevo usuario
-    const newUser = { id: userId, name, email, password: hashedPassword, lastConnection: null, token: null };
+    const newUser = {
+        id: userId,
+        name,
+        email,
+        password: hashedPassword,
+        lastConnection: null,
+        publicKey,
+    };
+    
+    // Guardar la clave privada en un archivo separado para propósitos de prueba
+    fs.writeFileSync(`./data/privateKey.json`, JSON.stringify({ userId, privateKey }), 'utf-8');
+
+
     console.log("Datos después de cifrar");
     console.log(newUser);
 
@@ -75,11 +101,26 @@ export const loginUser = (req, res) => {
         // Actualizar la última conexión del usuario
         user.lastConnection = new Date().toISOString();
 
+        // Crear el token de sesión
+        const sessionToken = JSON.stringify({ userId: user.id, timestamp: Date.now() });
+
+        // Cargar la clave pública del usuario para cifrar el token de sesión
+        const publicKey = forge.pki.publicKeyFromPem(user.publicKey);
+        const encryptedToken = forge.util.encode64(publicKey.encrypt(sessionToken));
+
+        // Establecer cookie segura con el token
+        res.setHeader('Set-Cookie', cookie.serialize('sessionToken', encryptedToken, {
+            httpOnly: false, // Cambia a false si necesitas acceder a la cookie desde JavaScript
+            secure: false, // Asegúrate de usar 'true' solo en producción
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 24, // Expiración de 1 día
+            path: '/', // Hacer que la cookie esté disponible en toda la aplicación
+        }));
         // Escribir los datos actualizados en el archivo JSON
         fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2), 'utf-8');
-
+        
         // Login exitoso
-        res.status(200).json({ message: 'Inicio de sesión exitoso', userId: user.id });
+        res.status(200).json({ message: 'Inicio de sesión exitoso', token: encryptedToken });
     } catch (error) {
         console.error('Error en /login:', error);
         res.status(500).json({ message: 'Error interno del servidor' });

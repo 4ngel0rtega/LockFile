@@ -1,10 +1,10 @@
 [
   {
-    "id": "d2c0f8f6-80cc-4892-83eb-e854acd79979",
-    "name": "Angel Isaac Ortega Esparza",
-    "email": "ang3l.esparza@gmail.com",
+    "id": "63382e37-1013-4ebb-8dca-3f7406e9b51d",
+    "name": "Angel",
+    "email": "ang3l.ortega21@gmail.com",
     "password": "43ecf610ea57325e75d0d0abcfa33bf7efd6183b88b2d3d6bd27f5062a4303ce33df81146520c3b786ece3a0ff7406d8e79552bde1688cf7e8590604a610e9b0",
-    "lastConnection": "2024-10-25T01:04:25.841Z",
-    "token": null
+    "lastConnection": "2024-10-25T05:46:44.171Z",
+    "publicKey": "-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvLC9hfqvMN80WYrwqn6I\r\naP+At5PR0GY0XVk9L2LwbLN8oC0HJ7KhGd5pc3ssUBDYv/wlGnx4Q7XA49ja1OzS\r\ncNDoJi5F9vKrs9QmC9oqu4Cu0R7kCDmVG05UwvdsGbuoSMW9S4rLUna4yqGqfg85\r\nitoG6erc79OYvdaAGpcQqzl5QDs2kHDS6tMGm+4fEmV6yRsMJUa2NKiKTVcLUU9z\r\nFr9XMjX661GUwzXKnbIvx2sxZiEDv5hhaPDzIw7ZWmyZZSwvabL6QWNICM6ozFdK\r\nFzkkXNwSzE4TVcOyUZbuoB0N7enqlsD1YWPeCnlJQKeNCp21TkVnGNwsR7znk2nR\r\n2wIDAQAB\r\n-----END PUBLIC KEY-----\r\n"
   }
 ]
