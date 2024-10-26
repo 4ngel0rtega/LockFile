@@ -1,9 +1,25 @@
 import { Link } from "react-router-dom";
 import Navbar from "../components/navbar";
 import { FaLock, FaUserPlus } from "react-icons/fa";
+import { useEffect, useState } from "react";
 
 
 function Home() {
+
+    const [ isLogin, setIsLogin] = useState(false)
+
+    useEffect(() => {
+        // Verifica si la cookie de sesión existe
+        const hasSessionCookie = document.cookie.includes('sessionToken');
+
+        if (hasSessionCookie) {
+            // Si ya tiene la cookie de sesión, redirige a la página principal
+            setIsLogin(false)
+        } else {
+            setIsLogin(true);
+        }
+    }, []);
+    
 
     return (
         <>
@@ -21,16 +37,18 @@ function Home() {
                         <p className="text-xl md:text-2xl text-gray-300 mb-8 animate-fade-in-up">
                             Embárcate en un viaje para descubrir el fascinante mundo del cifrado y la comunicación segura en nuestro proyecto escolar.
                         </p>
-                        <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                            <Link to={"/login"} className="flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <FaLock className="mr-2"/>
-                                Iniciar Sesión
-                            </Link>
-                            <Link to={"/register"} className="flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                <FaUserPlus className="mr-2"/>
-                                Registro
-                            </Link>
-                        </div>
+                        { isLogin && (
+                            <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                                <Link to={"/login"} className="flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <FaLock className="mr-2"/>
+                                    Iniciar Sesión
+                                </Link>
+                                <Link to={"/register"} className="flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                    <FaUserPlus className="mr-2"/>
+                                    Registro
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>
