@@ -54,6 +54,8 @@ export const registerUser = (req, res) => {
     // Cifrar datos sensibles con 3DES
     const encryptedName = encrypt3DES(name, desKey);
     const encryptedEmail = encrypt3DES(email, desKey);
+    const encryptedBalance = encrypt3DES("51,324.58", desKey);
+    const encryptedAccountType = encrypt3DES("Usuario Normal", desKey);
 
     // Leer el archivo JSON existente (o crearlo si no existe)
     const usersFilePath = './data/users.json';
@@ -84,8 +86,8 @@ export const registerUser = (req, res) => {
         phone: null,
         addres: null,
         lastConnection: null,
-        balance: null,
-        accountType: null,
+        balance: encryptedBalance,
+        accountType: encryptedAccountType,
         publicKey,
     };
     
