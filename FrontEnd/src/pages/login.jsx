@@ -1,8 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaArrowLeft, FaEye, FaEyeSlash, FaUnlock } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Verifica si la cookie de sesión existe
+        const hasSessionCookie = document.cookie.includes('sessionToken');
+
+        if (hasSessionCookie) {
+            // Si ya tiene la cookie de sesión, redirige a la página principal
+            navigate('/');
+        }
+    }, [navigate]);
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -50,7 +62,7 @@ function Login() {
             console.log('Response received:', data);
     
             if (response.ok) {
-                alert('Inicio de sesión exitoso');
+                navigate("/")
                 setErrors((prev) => ({ ...prev, loginError: "" }));
             } else {
                 setErrors((prev) => ({

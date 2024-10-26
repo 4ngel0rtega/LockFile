@@ -13,6 +13,25 @@ function generateKeyPair() {
     };
 }
 
+// Función para cifrar con 3DES
+function encrypt3DES(text, key) {
+    const encrypted = CryptoJS.TripleDES.encrypt(text, key, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
+    return encrypted.toString();
+}
+
+// Función para descifrar con 3DES
+function decrypt3DES(encryptedText, key) {
+    const decrypted = CryptoJS.TripleDES.decrypt(encryptedText, key, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
+    return decrypted.toString(CryptoJS.enc.Utf8);
+}
+
+
 // Ruta para registrar un nuevo usuario
 export const registerUser = (req, res) => {
     const { name, email, password } = req.body;
@@ -29,6 +48,13 @@ export const registerUser = (req, res) => {
     // Generar par de claves RSA (pública y privada)
     const { privateKey, publicKey } = generateKeyPair();
 
+    // Generar clave secreta para 3DES
+    const desKey = CryptoJS.enc.Utf8.parse("miClaveSecretaPara3DES");
+
+    // Cifrar datos sensibles con 3DES
+    const encryptedName = encrypt3DES(name, desKey);
+    const encryptedEmail = encrypt3DES(email, desKey);
+
     // Leer el archivo JSON existente (o crearlo si no existe)
     const usersFilePath = './data/users.json';
     let users = [];
@@ -39,7 +65,7 @@ export const registerUser = (req, res) => {
     }
 
     // Buscar el email del usuario en los registros
-    const userExists = users.find(user => user.email === email);
+    const userExists = users.find(user => decrypt3DES(user.email, desKey) === email);
 
     // Verificar si se encontró el email
     if (userExists) {
@@ -50,10 +76,16 @@ export const registerUser = (req, res) => {
     // Crear un nuevo usuario
     const newUser = {
         id: userId,
-        name,
-        email,
+        imageProfile: "https://images.freeimages.com/365/images/previews/85b/psd-universal-blue-web-user-icon-53242.jpg",
+        name: encryptedName,
+        email: encryptedEmail,
         password: hashedPassword,
+        curp: null,
+        phone: null,
+        addres: null,
         lastConnection: null,
+        balance: null,
+        accountType: null,
         publicKey,
     };
     
@@ -88,7 +120,9 @@ export const loginUser = (req, res) => {
             users = JSON.parse(data);
         }
 
-        const user = users.find(u => u.email === email);
+        const desKey = CryptoJS.enc.Utf8.parse("miClaveSecretaPara3DES")
+        
+        const user = users.find(u => decrypt3DES(u.email, desKey) === email);
 
         if (!user) {
             return res.status(404).json({ message: "Usuario no encontrado" });

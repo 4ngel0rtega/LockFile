@@ -1,9 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaArrowLeft, FaDoorOpen, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
 import { IoCloseOutline } from "react-icons/io5";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Register() {
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Verifica si la cookie de sesión existe
+        const hasSessionCookie = document.cookie.includes('sessionToken');
+
+        if (hasSessionCookie) {
+            // Si ya tiene la cookie de sesión, redirige a la página principal
+            navigate('/');
+        }
+    }, [navigate]);
+
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
