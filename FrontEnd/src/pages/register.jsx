@@ -19,11 +19,12 @@ function Register() {
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [repeatPassword, setRepeatPassword] = useState("");
     const [showRepeatPassword, setShowRepeatPassword] = useState(false);
-    const [errors, setErrors] = useState({ name: "", email: "", password: "", repeatPassword: "" });
+    const [errors, setErrors] = useState({ name: "", email: "", phone: "", password: "", repeatPassword: "" });
 
     const [ showModal, setShowModal ] = useState(false)
 
@@ -51,6 +52,18 @@ function Register() {
         setErrors((prev) => ({ ...prev, email: "" }));
         return true;
     };
+
+    const validatePhone = (phone) => {
+        if (phone.length < 10) {
+            setErrors((prev) => ({
+                ...prev,
+                phone: "El formato del teléfono debe tener 10 dígitos"
+            }))
+            return false;
+        }
+        setErrors((prev) => ({...prev, phone: ""}))
+        return true;
+    }
 
     const validatePassword = (password) => {
         let errors = [];
@@ -114,8 +127,13 @@ function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
     
-        if (name.length <= 0 || email.length <= 0 || password.length <= 0 || repeatPassword.length <= 0) {
+        if (name.length <= 0 || email.length <= 0 || phone.length <= 0 || password.length <= 0 || repeatPassword.length <= 0) {
             alert("No puede dejar campos vacíos");
+            return;
+        }
+
+        if (phone.length < 10) {
+            alert("El teléfono debe tener 10 dígitos");
             return;
         }
     
@@ -126,7 +144,7 @@ function Register() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, email, password })
+                body: JSON.stringify({ name, email, phone, password })
             });
     
             const data = await response.json();
@@ -211,6 +229,29 @@ function Register() {
                             {errors.email && (
                                 <p className="mt-1 text-sm text-red-500" role="alert">
                                     {errors.email}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label htmlFor="phone" className="block text-sm font-medium text-gray-300" aria-label="Teléfono">
+                                Teléfono
+                            </label>
+                            <div className="mt-1">
+                                <input type="tel" name="phone" id="phone" autoComplete="phone" required 
+                                    className={`appearance-none relative block w-full px-3 py-2 border ${errors.phone ? "border-red-500" : "border-gray-500"} bg-gray-700 placeholder-gray-400 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300`}
+                                    placeholder="Ingrese su correo electrónico"
+                                    value={phone}
+                                    onChange={(e) => {
+                                        setPhone(e.target.value);
+                                        validatePhone(e.target.value);
+                                    }}
+                                   
+                                />
+                            </div>
+                            {errors.phone && (
+                                <p className="mt-1 text-sm text-red-500" role="alert">
+                                    {errors.phone}
                                 </p>
                             )}
                         </div>
