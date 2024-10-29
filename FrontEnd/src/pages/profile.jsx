@@ -12,8 +12,12 @@ import Navbar from "../components/navbar";
 import { useEffect, useState } from "react";
 import { FaRegEdit } from "react-icons/fa";
 import { PiIdentificationBadge } from "react-icons/pi";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
+  const navigate = useNavigate();
+
+  
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [userData, setUserData] = useState([]);
@@ -30,8 +34,7 @@ function Profile() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [isReloading, setIsReloading] = useState(false);
-
+  
   useEffect(() => {
     // Funcion para obtener los datos del usuario
     async function fetchUserData() {
@@ -58,8 +61,14 @@ function Profile() {
       }
     }
 
-    fetchUserData();
-  }, [isReloading]);
+      const hasSessionCookie = document.cookie.includes('sessionToken');
+
+      if (hasSessionCookie) {
+          fetchUserData();
+      } else {
+          navigate("/")
+      }
+  }, [navigate]);
 
   const validateName = (name) => {
     if (name.length <= 0) {
@@ -186,6 +195,29 @@ function Profile() {
     // Format as MM/DD/YYYY HH:MM:SS
     return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
   };
+
+  const handleLogout = async () => {
+    try {
+        const response = await fetch('http://localhost:3001/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            console.log(result.message);
+
+            navigate("/");
+        } else {
+            console.error('Error en el cierre de sesión: ', result.message)
+        }
+    } catch (error) {
+        console.error('Error en el cierre de sesión', error);
+         
+        alert("Error al cerrar la sesión, intentalo de nuevo");
+    }
+}
+
 
   return (
     <>
@@ -451,16 +483,17 @@ function Profile() {
                         Actividad de inicio de sesión reciente
                       </h3>
                       <div className="space-y-4">
-                        <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                          <BiHistory className="w-6 h-6 text-gray-400" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              Edge
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {formatDate(userData.lastConnection)}
-                            </p>
+                        <div className="flex items-center justify-between space-x-4 p-4 bg-gray-50 rounded-lg">
+                           <div className="flex items-center space-x-4">
+                              <BiHistory className="w-6 h-6 text-gray-400" />
+                              <div>
+                                  <p className="text-sm font-medium text-gray-900">Edge</p>
+                                  <p className="text-sm text-gray-500">{formatDate(userData.lastConnection)}</p>
+                              </div>
                           </div>
+                          <button onClick={handleLogout} className="bg-red-500 p-2 rounded-md text-white font-medium hover:bg-red-600 transition-colors duration-300">
+                              Cerrar Sesión
+                          </button>
                         </div>
                       </div>
                     </div>

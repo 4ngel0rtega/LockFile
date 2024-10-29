@@ -34,7 +34,7 @@ function decrypt3DES(encryptedText, key) {
 
 // Ruta para registrar un nuevo usuario
 export const registerUser = (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, phone, password } = req.body;
 
     console.log("Datos antes de cifrar");
     console.log(req.body);
@@ -54,6 +54,7 @@ export const registerUser = (req, res) => {
     // Cifrar datos sensibles con 3DES
     const encryptedName = encrypt3DES(name, desKey);
     const encryptedEmail = encrypt3DES(email, desKey);
+    const encryptedPhone = encrypt3DES(phone, desKey);
     const encryptedBalance = encrypt3DES("51,324.58", desKey);
     const encryptedAccountType = encrypt3DES("Usuario Normal", desKey);
 
@@ -83,7 +84,7 @@ export const registerUser = (req, res) => {
         email: encryptedEmail,
         password: hashedPassword,
         curp: null,
-        phone: null,
+        phone: encryptedPhone,
         addres: null,
         lastConnection: null,
         balance: encryptedBalance,
@@ -163,4 +164,15 @@ export const loginUser = (req, res) => {
     }
 };
 
+
+export const logoutUser = (req, res) => {
+    res.setHeader('Set-Cookie', cookie.serialize('sessionToken', '', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        maxAge: 0,
+        path: '/',
+    }));
+    res.status(200).json({ message: 'Sesión cerrada correctamente'})
+}
 

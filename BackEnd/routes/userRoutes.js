@@ -9,4 +9,5 @@ userRouter.get("/getUser", getUser);
 // Ruta para actualizar datos
 userRouter.post("/updateUser", updateUser);
 
+
 export default userRouter;
