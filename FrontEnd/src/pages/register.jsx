@@ -1,21 +1,15 @@
+import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { FaArrowLeft, FaDoorOpen, FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
 import { IoCloseOutline } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
+import { auth, db } from "../../firebaseConfig";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { FcGoogle } from "react-icons/fc";
 
 function Register() {
 
     const navigate = useNavigate();
-
-    useEffect(() => {
-        // Verifica si la cookie de sesión existe
-        const hasSessionCookie = document.cookie.includes('sessionToken');
-
-        if (hasSessionCookie) {
-            // Si ya tiene la cookie de sesión, redirige a la página principal
-            navigate('/');
-        }
-    }, [navigate]);
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -27,6 +21,18 @@ function Register() {
     const [errors, setErrors] = useState({ name: "", email: "", phone: "", password: "", repeatPassword: "" });
 
     const [ showModal, setShowModal ] = useState(false)
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                navigate("/");
+            }
+        });
+    
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
+    }, [navigate]);
+    
 
     const validateName = (name) => {
         if (name.length <= 0) {
@@ -124,49 +130,52 @@ function Register() {
         return true;
     };
     
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-    
-        if (name.length <= 0 || email.length <= 0 || phone.length <= 0 || password.length <= 0 || repeatPassword.length <= 0) {
-            alert("No puede dejar campos vacíos");
+    const handleRegister = async (event) => {
+        event.preventDefault();
+
+        if (!validateEmail(email) || !validateName(name) || !validatePassword(password) || !validatePhone(phone) || !validateRepeatPassword(repeatPassword)) {
             return;
         }
 
-        if (phone.length < 10) {
-            alert("El teléfono debe tener 10 dígitos");
-            return;
-        }
-    
         try {
-            // Realizar la solicitud POST al backend
-            const response = await fetch('http://localhost:3001/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, email, phone, password })
-            });
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            await setDoc(doc(db, 'users', user.uid), {
+                name: name,
+                phone: phone,
+                email: email,
+                curp: "",
+                address: "",
+            })
+
+            navigate("/");
+        } catch (error) {
+            console.error("Error al registrar al usuario: ", error);
+        }
+    }
     
-            const data = await response.json();
-    
-            if (response.ok) {
-                setShowModal(true);
-                setName("");
-                setEmail("");
-                setPassword("");
-                setRepeatPassword("");
-            } else if (response.status === 409) {
-                // Mostrar mensaje de error cuando el correo ya está registrado
-                alert(data.message);
-            } else {
-                alert(data.message || 'Error al registrar al usuario');
+    const handleGoogleSingIn = async () => {
+        const provider = new GoogleAuthProvider();
+
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (!userDoc.exists()) {
+                await setDoc(doc(db, 'users', user.uid), {
+                    name: user.displayName || user.email,
+                    phone: "",
+                    email: user.email,
+                    curp: "",
+                    address: "",
+                });
             }
         } catch (error) {
-            console.error('Error:', error);
-            alert("Error al registrar el usuario");
+            console.error("Error al iniciar sesión con Google: ", error);
         }
-    };
-    
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
@@ -186,7 +195,7 @@ function Register() {
                     <p className="mt-2 text-sm text-gray-400">Ingrese sus credenciales para encriptarlas</p>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                <form className="mt-8 space-y-6" onSubmit={handleRegister}>
                     <div className="space-y-4">
                     <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-300" aria-label="Nombre de Usuario">
@@ -325,6 +334,14 @@ function Register() {
 
                 <div className="text-center text-white">
                     <p>Ya tienes cuenta? <Link to={"/login"} className="font-medium text-blue-400">Inicia Sesión</Link> </p>
+                
+                    <p>o</p>
+
+                    <div className="mt-2">
+                        <button onClick={() => handleGoogleSingIn()} className="bg-white p-1 rounded-sm">
+                            <FcGoogle size={28}/>
+                        </button>
+                    </div>
                 </div>
             </div>
 

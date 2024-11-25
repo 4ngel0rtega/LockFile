@@ -123,6 +123,7 @@ export const loginUser = (req, res) => {
             users = JSON.parse(data);
         }
 
+        
         const desKey = CryptoJS.enc.Utf8.parse("miClaveSecretaPara3DES")
         
         const user = users.find(u => decrypt3DES(u.email, desKey) === email);

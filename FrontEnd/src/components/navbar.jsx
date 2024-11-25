@@ -2,28 +2,25 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom"
 import { FiUser } from "react-icons/fi";
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
 
-const parseCookies = (cookieString) => {
-    return cookieString.split(';').reduce((cookies, cookie) => {
-        const [name, value] = cookie.trim().split('=');
-        cookies[name] = decodeURIComponent(value);
-        return cookies;
-    }, {});
-};
 
 function Navbar() {
 
-    // Leer las cookies
-    const [cookies, setCookies] = useState({});
-
+    const [user, setUser] = useState(null);
+    
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const cookieString = document.cookie;
-            console.log('document.cookie:', cookieString);
-            const parsedCookies = parseCookies(cookieString);
-            setCookies(parsedCookies);
-            console.log('Parsed Cookies:', parsedCookies);
-        }
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUser(user)
+            } else {
+                setUser(null);
+            }
+        });
+    
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
     }, []);
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -78,7 +75,7 @@ function Navbar() {
                         </div>
 
                         <div className="flex items-center">
-                            {cookies.sessionToken ? (
+                            {user ? (
                                 <Link to={"/myProfile"}>
                                     <FaUserCircle className="text-white hover:text-gray-300 transition-colors duration-300" size={20}/>
                                 </Link>
@@ -120,7 +117,7 @@ function Navbar() {
                             </a>
 
                             <div className="mt-4">
-                                {cookies.sessionToken ? (
+                                {user ? (
                                     <Link to={"/myProfile"}>
                                         <FaUserCircle className="text-white hover:text-gray-300 transition-colors duration-300" size={20}/>
                                     </Link>
