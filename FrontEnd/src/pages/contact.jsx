@@ -4,7 +4,7 @@ import { useForm, ValidationError } from "@formspree/react";
 const Contact = () => {
   const [state, handleSubmit] = useForm("mkgnvdwj");
   if (state.succeeded) {
-    return <p>Thanks for joining!</p>;
+    return alert("Gracias por ponerse en contacto con nosotros!");
   }
   return (
     <>
@@ -44,7 +44,11 @@ const Contact = () => {
               field="message"
               errors={state.errors}
             />
-            <button type="submit" className="rounded-lg shadow-md w-full h-8 bg-cyan-500 hover:bg-cyan-400 text-white hover:shadow-white transition-shadow transition-bg transition-300" disabled={state.submitting}>
+            <button
+              type="submit"
+              className="rounded-lg shadow-md w-full h-8 bg-cyan-500 hover:bg-cyan-400 text-white hover:shadow-white transition-shadow transition-bg transition-300"
+              disabled={state.submitting}
+            >
               Submit
             </button>
           </form>
