@@ -1,24 +1,31 @@
+import { GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { FaArrowLeft, FaEye, FaEyeSlash, FaUnlock } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
+import { auth, db } from "../../firebaseConfig";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 function Login() {
     const navigate = useNavigate();
-
-    useEffect(() => {
-        // Verifica si la cookie de sesión existe
-        const hasSessionCookie = document.cookie.includes('sessionToken');
-
-        if (hasSessionCookie) {
-            // Si ya tiene la cookie de sesión, redirige a la página principal
-            navigate('/');
-        }
-    }, [navigate]);
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({ email: "", password: "", loginError: "" });
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                navigate("/");
+            }
+        });
+    
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
+    }, [navigate]);
+    
+    
 
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -45,37 +52,41 @@ function Login() {
         return true;
     };
     
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-    
+    const handleLogin = async () => {
+        
+        if (!validateEmail(email) || !validatePassword(password)) {
+            return;
+        }
+
         try {
-            const response = await fetch('http://localhost:3001/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include', // Permitir cookies en la solicitud
-                body: JSON.stringify({ email, password })
-            });
+            await signInWithEmailAndPassword(auth, email, password);
+            navigate("/")
+        } catch (error) {
+            console.error("Error al iniciar sesión: ", error);
+        }
+    }
     
-            const data = await response.json();
-            console.log('Response received:', data);
-    
-            if (response.ok) {
-                navigate("/")
-                setErrors((prev) => ({ ...prev, loginError: "" }));
-            } else {
-                setErrors((prev) => ({
-                    ...prev,
-                    loginError: "Contraseña o correo electrónico incorrectos"
-                }));
+    const handleGoogleSingIn = async () => {
+        const provider = new GoogleAuthProvider();
+
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (!userDoc.exists()) {
+                await setDoc(doc(db, 'users', user.uid), {
+                    name: user.displayName || user.email,
+                    phone: "",
+                    email: user.email,
+                    curp: "",
+                    address: "",
+                });
             }
         } catch (error) {
-            console.error('Error en el login:', error);
-            alert('Error al iniciar sesión');
+            console.error("Error al iniciar sesión con Google: ", error);
         }
-    };
-    
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 p-4">
@@ -95,7 +106,7 @@ function Login() {
                     <p className="mt-2 text-sm text-gray-400">Ingrese sus credenciales para descifrar</p>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                <form className="mt-8 space-y-6" onSubmit={handleLogin}>
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-300" aria-label="Correo Electrónico">
@@ -165,6 +176,14 @@ function Login() {
 
                 <div className="text-center text-white">
                     <p>¿No tienes cuenta? <Link to={"/register"} className="font-medium text-green-400">Regístrate</Link> </p>
+                    
+                    <p>o</p>
+
+                    <div className="mt-2">
+                        <button onClick={() => handleGoogleSingIn()} className="bg-white p-1 rounded-sm">
+                            <FcGoogle size={28}/>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

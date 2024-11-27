@@ -13,11 +13,14 @@ import { useEffect, useState } from "react";
 import { FaRegEdit } from "react-icons/fa";
 import { PiIdentificationBadge } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
+import { auth, db } from "../../firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 function Profile() {
   const navigate = useNavigate();
 
-  
+  const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [userData, setUserData] = useState([]);
@@ -36,39 +39,28 @@ function Profile() {
   const [address, setAddress] = useState("");
   
   useEffect(() => {
-    // Funcion para obtener los datos del usuario
-    async function fetchUserData() {
-      try {
-        const response = await fetch("http://localhost:3001/user/getUser", {
-          method: "GET",
-          credentials: "include",
-        });
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+          setUser(user);
 
-        if (!response.ok) {
-          throw new Error("Error al obtener los datos del usuario");
-        }
-
-        const data = await response.json();
-        setUserData(data.userData);
-        setName(data.userData.name);
-        setCurp(data.userData.curp);
-        setEmail(data.userData.email);
-        setPhone(data.userData.phone);
-        setAddress(data.userData.addres);
-      } catch (error) {
-        console.error("Error al obtener los datos del usuario.", error);
-        alert("No se pudieron cargar los datos del usario");
-      }
-    }
-
-      const hasSessionCookie = document.cookie.includes('sessionToken');
-
-      if (hasSessionCookie) {
-          fetchUserData();
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+              setUserData(userDoc.data());
+              setName(userData.name || "");
+              setCurp(userData.cupr || "");
+              setEmail(userData.email || ""); 
+              setPhone(userData.phone || ""); 
+              setAddress(userData.address || "");
+          } else {
+              console.log("Sin documentos");
+          }
       } else {
-          navigate("/")
+          setUser(null);
       }
-  }, [navigate]);
+  });
+
+  return () => unsubscribe();
+  })
 
   const validateName = (name) => {
     if (name.length <= 0) {
@@ -145,76 +137,46 @@ function Profile() {
   };
 
   const handleSaveProfile = async () => {
+
+    if(!validateName(name) || !validateCurp(curp) || !validateEmail(email) || !validatePhone(phone) || !validateAddress(address)) {
+      return
+    }
+
     try {
-      // Crear objeto con los datos del perfil
-      const profileData = {
-        name,
-        curp,
-        email,
-        phone,
-        address,
-      };
-
-      // Realizar la solicitud de actualización al backend
-      const response = await fetch("http://localhost:3001/user/updateUser", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(profileData),
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        name: name,
+        curp: curp,
+        phone: phone,
+        address: address
       });
-
-      const result = await response.json();
-      if (response.ok) {
-        console.log(result.message); // Mensaje de éxito
-        window.location.reload(false);
-      } else {
-        console.error("Error:", result.message);
-      }
+      console.log("Perfil actualizado exitosamente");
     } catch (error) {
-      console.error("Error en la actualización del perfil:", error);
+      console.error("Error al actualizar el perfil: ", error);
     }
   };
 
   // Function to format the last login time into a readable format.
   const formatDate = (ISOdate) => {
-    // Create a Date object from the ISO string
     const date = new Date(ISOdate);
 
-    // Extract date components
     const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Months are 0-indexed, so we add 1
     const day = String(date.getUTCDate()).padStart(2, "0");
     const year = date.getUTCFullYear();
 
-    // Extract time components
     const hours = String(date.getUTCHours()).padStart(2, "0");
     const minutes = String(date.getUTCMinutes()).padStart(2, "0");
     const seconds = String(date.getUTCSeconds()).padStart(2, "0");
 
-    // Format as MM/DD/YYYY HH:MM:SS
     return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
   };
 
   const handleLogout = async () => {
     try {
-        const response = await fetch('http://localhost:3001/auth/logout', {
-            method: 'POST',
-            credentials: 'include'
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            console.log(result.message);
-
-            navigate("/");
-        } else {
-            console.error('Error en el cierre de sesión: ', result.message)
-        }
+      await auth.signOut();
+      navigate("/")
     } catch (error) {
-        console.error('Error en el cierre de sesión', error);
-         
-        alert("Error al cerrar la sesión, intentalo de nuevo");
+      console.error("Error al cerrar la sesión: ", error);
     }
 }
 
@@ -232,7 +194,7 @@ function Profile() {
                 <div className="absolute -bottom-16 left-8">
                   <div className="relative">
                     <img
-                      src={userData.imageProfile}
+                      src={"https://cdn-icons-png.flaticon.com/512/9131/9131529.png"}
                       alt="Profile"
                       className="w-32 h-32 rounded-full border-4 border-white object-cover"
                     />
@@ -488,7 +450,7 @@ function Profile() {
                               <BiHistory className="w-6 h-6 text-gray-400" />
                               <div>
                                   <p className="text-sm font-medium text-gray-900">Edge</p>
-                                  <p className="text-sm text-gray-500">{formatDate(userData.lastConnection)}</p>
+                                  {/* <p className="text-sm text-gray-500">{formatDate(userData.lastConnection)}</p> */}
                               </div>
                           </div>
                           <button onClick={handleLogout} className="bg-red-500 p-2 rounded-md text-white font-medium hover:bg-red-600 transition-colors duration-300">
