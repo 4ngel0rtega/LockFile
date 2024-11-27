@@ -60,17 +60,11 @@ function Navbar() {
                             >
                                 Inicio
                             </a>
-                            <a href="/Upload"
+                            <a href="/contact"
                                 className="text-white hover:text-gray-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 focus:outline-none foucs:ring-2 focus:ring-indigo-500"
-                                aria-label="Subir archivo"
+                                aria-label="Contacto"
                             >
-                                Subir Archivo
-                            </a>
-                            <a href="/Download"
-                                className="text-white hover:text-gray-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 focus:outline-none foucs:ring-2 focus:ring-indigo-500"
-                                aria-label="Descargar archivo"
-                            >
-                                Descargar Archivo
+                                Contacto
                             </a>
                         </div>
 
@@ -103,17 +97,11 @@ function Navbar() {
                             >
                                 Inicio
                             </a>
-                            <a href="/Upload"
-                                className="text-white hover:text-gray-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 focus:outline-none foucs:ring-2 focus:ring-indigo-500"
-                                aria-label="Subir archivo"
-                            >
-                                Subir Archivo
-                            </a>
-                            <a href="/Download"
+                            <a href="/contact"
                                 className="text-white hover:text-gray-400 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 focus:outline-none foucs:ring-2 focus:ring-indigo-500"
                                 aria-label="Descargar archivo"
                             >
-                                Descargar Archivo
+                                Contacto
                             </a>
 
                             <div className="mt-4">

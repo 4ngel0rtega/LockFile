@@ -1,14 +1,18 @@
-import React from "react";
 import { useForm, ValidationError } from "@formspree/react";
+import Navbar from "../components/navbar";
 
 const Contact = () => {
   const [state, handleSubmit] = useForm("mkgnvdwj");
+
   if (state.succeeded) {
     return <p>Thanks for joining!</p>;
   }
+  
   return (
     <>
-      <div className="w-screen h-screen bg-slate-900 flex justify-center items-center">
+      <Navbar/>
+
+      <div className="w-full h-screen bg-slate-900 flex justify-center items-center">
         <div className="rounded-lg shadow-md w-1/3 bg-neutral-700 p-4">
           <h1 className="text-4xl text-white text-center">Contact Us</h1>
           <form onSubmit={handleSubmit}>
