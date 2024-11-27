@@ -5,12 +5,14 @@ const Contact = () => {
   const [state, handleSubmit] = useForm("mkgnvdwj");
 
   if (state.succeeded) {
-    return <p>Thanks for joining!</p>;
+    return alert(
+      "Gracias por contactarnos! Te responderemos lo antes posible."
+    );
   }
-  
+
   return (
     <>
-      <Navbar/>
+      <Navbar />
 
       <div className="w-full h-screen bg-slate-900 flex justify-center items-center">
         <div className="rounded-lg shadow-md w-1/3 bg-neutral-700 p-4">
@@ -48,7 +50,11 @@ const Contact = () => {
               field="message"
               errors={state.errors}
             />
-            <button type="submit" className="rounded-lg shadow-md w-full h-8 bg-cyan-500 hover:bg-cyan-400 text-white hover:shadow-white transition-shadow transition-bg transition-300" disabled={state.submitting}>
+            <button
+              type="submit"
+              className="rounded-lg shadow-md w-full h-8 bg-cyan-500 hover:bg-cyan-400 text-white hover:shadow-white transition-shadow transition-bg transition-300"
+              disabled={state.submitting}
+            >
               Submit
             </button>
           </form>
