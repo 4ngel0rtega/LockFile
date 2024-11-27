@@ -52,8 +52,9 @@ function Login() {
         return true;
     };
     
-    const handleLogin = async () => {
-        
+    const handleLogin = async (event) => {
+        event.preventDefault();
+
         if (!validateEmail(email) || !validatePassword(password)) {
             return;
         }
