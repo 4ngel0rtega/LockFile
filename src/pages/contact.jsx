@@ -5,7 +5,7 @@ const Contact = () => {
   const [state, handleSubmit] = useForm("mkgnvdwj");
 
   if (state.succeeded) {
-    return alert(
+    alert(
       "Gracias por contactarnos! Te responderemos lo antes posible."
     );
   }
